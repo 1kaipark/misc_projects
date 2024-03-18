@@ -38,13 +38,8 @@ def create_video(img_path, audio_path, output_path):
         print(f"L {e}")
 
 
-imgs_dir = input("absolute path to image directory: \n")
-if imgs_dir.endswith(' '):
-    imgs_dir = imgs_dir[:-1]
-audio_file = input("absolute path to audio file: \n")
-if audio_file.endswith(' '):
-    audio_file = audio_file[:-1]
-
+imgs_dir = input("absolute path to image directory: \n").strip()
+audio_file = input("absolute path to audio file: \n").strip()
 output_file = input("filename of output video, will be saved in current directory: \n")
 
 # choose random image from directory
