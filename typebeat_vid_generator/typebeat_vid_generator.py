@@ -39,7 +39,11 @@ def create_video(img_path, audio_path, output_path):
 
 
 imgs_dir = input("absolute path to image directory: \n")
+if imgs_dir.endswith(' '):
+    imgs_dir = imgs_dir[:-1]
 audio_file = input("absolute path to audio file: \n")
+if audio_file.endswith(' '):
+    audio_file = audio_file[:-1]
 
 output_file = input("filename of output video, will be saved in current directory: \n")
 
@@ -54,7 +58,7 @@ for img in imgs_dir_files:
         if img.lower().endswith(ext) and img not in imgs_l:
             imgs_l.append(img)
 
-img_file = random.choice(imgs_l_f)
+img_file = random.choice(imgs_l)
 img_path = os.path.join(imgs_dir, img_file)
 
 create_video(img_path, audio_file, output_file)
