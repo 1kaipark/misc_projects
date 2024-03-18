@@ -9,7 +9,7 @@ for file in files_root:
 
 subdirs = next(os.walk(dir))[1]
 for subdir in subdirs:
-    files_sd = os.listdir(subdir)
+    files_sd = os.listdir(os.path.join(dir, subdir))
     for file in files_sd:
         if file == '.DS_Store':
             os.remove(os.path.join(dir, subdir, file))
