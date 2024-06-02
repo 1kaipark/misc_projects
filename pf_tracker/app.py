@@ -1,5 +1,5 @@
 import numpy as np
-from flask import Flask, render_template, request, redirect, url_for, Markup, flash
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, FloatField, DateField, SelectField, TextAreaField, SubmitField, IntegerField
 from wtforms.validators import DataRequired
@@ -74,8 +74,11 @@ def index():
     # month selector
     months = ['ALL'] + list(set(personal_finance._temp_data['month']))
 
-    month_data = personal_finance.monthly_cat_totals(month = month)
-    month_data['height'] = month_data['amount'].apply(np.log)
+    try:
+        month_data = personal_finance.monthly_cat_totals(month = month)
+        month_data['height'] = month_data['amount'].apply(np.log)
+    except Exception:
+        month_data = pd.DataFrame(columns=['category', 'amount', 'height'])
 
     if not month_data.empty:
         plt.figure(figsize=(8, 4))
