@@ -55,11 +55,6 @@ except AssertionError:
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # table for category totals
-    cat_totals = personal_finance.cat_totals.to_dict(orient='records')
-    for dict_ in cat_totals:
-        dict_['amount'] = f"${format(dict_['amount'], '.2f')}"
-
     # from the month selector -> url (/?month=XXX)
     month = request.args.get('month')
     if month != 'ALL':
@@ -103,6 +98,12 @@ def index():
 
     else:
         plot_url = None
+
+    # table for category totals
+    cat_totals = month_data.to_dict(orient='records')
+    for dict_ in cat_totals:
+        dict_['amount'] = f"${format(dict_['amount'], '.2f')}"
+
 
     return render_template('index.html', form=form, months=months, cat_totals = cat_totals, plot_url=plot_url)
 
