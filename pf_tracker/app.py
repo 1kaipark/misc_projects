@@ -1,3 +1,4 @@
+import numpy as np
 from flask import Flask, render_template, request, redirect, url_for, Markup, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, FloatField, DateField, SelectField, TextAreaField, SubmitField, IntegerField
@@ -11,7 +12,6 @@ import io
 import base64
 
 
-
 from personal_finance import PersonalFinance
 
 app = Flask(__name__)
@@ -19,31 +19,35 @@ app.config['SECRET_KEY'] = 'HELLO999BLUD666'
 
 
 class ExpenseForm(FlaskForm):
+    """form to create new expense"""
     # date entry
-    date = DateField('DATE', format='%Y-%m-%d', validators=[DataRequired()])
+    date = DateField('date', format='%Y-%m-%d', validators=[DataRequired()])
 
     # category entry
-    category = SelectField('CATEGORY',
+    category = SelectField('category',
                            choices=[('living', 'LIVING🏡'), ('food', 'FOOD🍔'), ('transport', 'TRANSPORT🚗'), ('fun', 'FUN😹'),
                                     ('education', 'EDUCATION🤓'), ('savings', 'SAVINGS🤑')], validators=[DataRequired()])
 
     # title of expense entry
-    title = StringField('TITLE', validators=[DataRequired()])
+    title = StringField('title', validators=[DataRequired()])
 
     # amount entry
-    amount = FloatField('AMOUNT', validators=[DataRequired()])
+    amount = FloatField('amount', validators=[DataRequired()])
 
     # optional notes
-    notes = TextAreaField('NOTES')
+    notes = TextAreaField('notes')
 
     # submit button
-    submit = SubmitField('ADD')
+    submit = SubmitField('add')
 
 class DeleteForm(FlaskForm):
-    index = IntegerField('INDEX', validators=[DataRequired()])
+    """form to delete an index"""
+    index = IntegerField('index', validators=[DataRequired()])
     confirm = SubmitField('CONFIRM DELETE')
 
 personal_finance = PersonalFinance('user')
+
+# try to load save
 try:
     personal_finance.load()
 except AssertionError:
@@ -51,9 +55,16 @@ except AssertionError:
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # table for category totals
+    cat_totals = personal_finance.cat_totals.to_dict(orient='records')
+    for dict_ in cat_totals:
+        dict_['amount'] = f"${format(dict_['amount'], '.2f')}"
+
+    # from the month selector -> url (/?month=XXX)
     month = request.args.get('month')
     if month != 'ALL':
         month = Period(month, 'M')
+        # else, month = 'ALL', which will return the sum from monthly_cat_totals
     form = ExpenseForm()
     if form.validate_on_submit():
         date = str(form.date.data)
@@ -69,13 +80,20 @@ def index():
     months = ['ALL'] + list(set(personal_finance._temp_data['month']))
 
     month_data = personal_finance.monthly_cat_totals(month = month)
-    print(month_data)
+    month_data['height'] = month_data['amount'].apply(np.log)
 
     if not month_data.empty:
         plt.figure(figsize=(8, 4))
-        sns.set_theme(style='dark')
-        sns.barplot(data=month_data, x = 'amount', y = 'category', width=0.5)
-        plt.title(month)
+        sns.set_theme(style='white')
+        sns.barplot(data=month_data, x = 'height', y = 'category', width=0.5)
+        sns.color_palette("magma", as_cmap=True)
+        sns.despine(bottom=True)
+        plt.xlabel(None)
+        plt.xticks(color='w')
+        if type(month) == pd._libs.tslibs.nattype.NaTType:
+            plt.title('ALL')
+        else:
+            plt.title(month)
         img = io.BytesIO()
         plt.savefig(img, format='png')
         img.seek(0)
@@ -85,11 +103,12 @@ def index():
     else:
         plot_url = None
 
-    return render_template('index.html', form=form, months=months, plot_url=plot_url)
+    return render_template('index.html', form=form, months=months, cat_totals = cat_totals, plot_url=plot_url)
 
 @app.route('/expenses', methods=['GET', 'POST'])
 def expenses():
-    delete_form = DeleteForm()
+    # expenses table
+    delete_form = DeleteForm() # to delete an index
     if delete_form.validate_on_submit():
         index = delete_form.index.data
         try:
@@ -100,7 +119,12 @@ def expenses():
             flash(f'UHHH', 'danger')
         return redirect(url_for('expenses'))
 
-    return render_template('expenses.html', delete_form=delete_form, expenses=personal_finance.data.to_dict('records'))
+    expenses = personal_finance.data.to_dict('records')
+
+    for dict_ in expenses:
+        dict_['amount'] = f"${format(dict_['amount'], '.2f')}"
+
+    return render_template('expenses.html', delete_form=delete_form, expenses=expenses)
 
 
 if __name__ == '__main__':

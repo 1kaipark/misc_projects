@@ -75,6 +75,7 @@ class PersonalFinance:
         self.data = pd.read_csv(f'personal_finance_{self.name}.csv')[['date', 'category', 'title', 'amount', 'notes']]
         self.data['date'] = self.data['date'].apply(lambda date: date[:10])
         self.data['date'] = pd.to_datetime(self.data['date'])
+        self.data['amount'] = self.data['amount'].apply(lambda amt: np.round(amt, 2))
         self._cat_totals = pd.DataFrame(columns=['category', 'amount'])
 
 
