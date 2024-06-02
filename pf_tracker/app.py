@@ -84,9 +84,9 @@ def index():
 
     if not month_data.empty:
         plt.figure(figsize=(8, 4))
-        sns.set_theme(style='white')
-        sns.barplot(data=month_data, x = 'height', y = 'category', width=0.5)
-        sns.color_palette("magma", as_cmap=True)
+        sns.set_theme(style='white', color_codes=True)
+        sns.set_palette('Paired')
+        sns.barplot(data=month_data, x='height', y='category', width=0.5)
         sns.despine(bottom=True)
         plt.xlabel(None)
         plt.xticks(color='w')
@@ -94,6 +94,7 @@ def index():
             plt.title('ALL')
         else:
             plt.title(month)
+
         img = io.BytesIO()
         plt.savefig(img, format='png')
         img.seek(0)
@@ -123,8 +124,31 @@ def expenses():
 
     for dict_ in expenses:
         dict_['amount'] = f"${format(dict_['amount'], '.2f')}"
+        dict_['date'] = str(dict_['date'])[:10]
 
-    return render_template('expenses.html', delete_form=delete_form, expenses=expenses)
+    if not personal_finance.daily_totals.empty:
+        daily_totals = personal_finance.daily_totals
+        daily_totals['date'] = daily_totals['date'].apply(lambda date: str(date)[:10])
+
+        plt.figure(figsize=(10, 3))
+        sns.set_theme(style='white', color_codes=True)
+        sns.set_palette('BuGn_r')
+        sns.barplot(data=daily_totals, x='date', y='amount', width=0.3)
+        plt.xticks(rotation=90)
+
+        img = io.BytesIO()
+        plt.tight_layout()
+
+        plt.savefig(img, format='png')
+        img.seek(0)
+        daily_barchart = base64.b64encode(img.getvalue()).decode()
+        daily_barchart = 'data:image/png;base64,{}'.format(daily_barchart)
+
+    else:
+        daily_barchart = None
+
+
+    return render_template('expenses.html', delete_form=delete_form, expenses=expenses, daily_barchart = daily_barchart)
 
 
 if __name__ == '__main__':

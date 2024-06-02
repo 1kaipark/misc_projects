@@ -24,6 +24,9 @@ class PersonalFinance:
         # dataframe for totals is stored here. also includes month
         self._cat_totals = pd.DataFrame(columns=['category', 'amount'])
 
+        # daily totals
+        self._daily_totals = pd.DataFrame(columns=['date', 'amount'])
+
     def new_entry(self, date: dt.date, category: str, title: str, amount: float, notes: str = ' ') -> None:
         new_row = pd.DataFrame([{
             'date': date,
@@ -51,14 +54,19 @@ class PersonalFinance:
         else:
             return None
 
+    @property
+    def daily_totals(self) -> pd.DataFrame:
+        if self._daily_totals.empty:
+            self._daily_totals = self.data[['date', 'amount']].groupby('date').sum().reset_index()
+        else:
+            1==1
+        return self._daily_totals
+
     def monthly_cat_totals(self, month: Period) -> pd.DataFrame | None:
         if month in list(set(self._temp_data['month'])):
             return self._temp_data[self._temp_data['month'] == month][['category', 'amount']].groupby('category').sum().reset_index()
         else:
             return self.cat_totals
-
-
-
 
     def delete_index(self, index: int) -> None:
         if index in self.data.index:

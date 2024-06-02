@@ -69,6 +69,17 @@
             </div>
         </div>
     </form>
+
+    {% if daily_barchart %}
+        <div class="row mt-4">
+        <div class="col-12">
+        <div class="row">
+            <div class="col-12">
+                <img src="{{ daily_barchart }}" class="img-fluid" alt="Bar Chart">
+            </div>
+        </div>
+    {% endif %}
+    <hr></hr>
 </div>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
