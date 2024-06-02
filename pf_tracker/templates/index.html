@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PERSONAL FINANCE</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <h1 class="mt-5">PERSONAL FINANCE</h1>
+    {% if plot_url %}
+    <div class="row">
+        <div class="col-12">
+            <img src="{{ plot_url }}" class="img-fluid" alt="Bar Chart">
+        </div>
+    </div>
+    {% endif %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <form method="GET" action="{{ url_for('index') }}">
+                <div class="form-group">
+                    <label for="month">MONTH</label>
+                    <select id="month" name="month" class="form-control" onchange="this.form.submit()">
+                        <option value="">------</option>
+                        {% for month in months %}
+                        <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>{{ month }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+            <form method="POST" action="{{ url_for('index', month=selected_month) }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.date.label(class="form-control-label") }}
+                    {{ form.date(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.category.label(class="form-control-label") }}
+                    {{ form.category(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.title.label(class="form-control-label") }}
+                    {{ form.title(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.amount.label(class="form-control-label") }}
+                    {{ form.amount(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.notes.label(class="form-control-label") }}
+                    {{ form.notes(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+            <a href="{{ url_for('expenses') }}" class="btn btn-secondary mt-3">ALL EXPENSES</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
